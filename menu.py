@@ -1,49 +1,86 @@
 import pygame
+import sys
+import subprocess
+from tkinter import messagebox
 
-def show_menu(screen):
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    font = pygame.font.Font(None, 36)
+# Khởi tạo Pygame
+pygame.init()
 
-    screen.fill(BLACK)
-    text1 = font.render("1 Player vs Player", True, WHITE)
-    text2 = font.render("2 Player vs Computer", True, WHITE)
-    screen.blit(text1, (400 - text1.get_width() // 2, 200))
-    screen.blit(text2, (400 - text2.get_width() // 2, 300))
-    pygame.display.flip()
+# Các màu sắc
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-def main():
-    pygame.init()
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Ping Pong Game")
+# Cài đặt cửa sổ
+WIDTH, HEIGHT = 1000, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Home")
 
-    show_menu(screen)
+# Tạo font
+font = pygame.font.SysFont("Consolas", 50)
 
-    mode = None
-    menu_running = True
-    while menu_running:
+
+def draw_text(text, font, color, surface, x, y):
+    text_obj = font.render(text, True, color)
+    text_rect = text_obj.get_rect()
+    text_rect.center = (x, y)
+    surface.blit(text_obj, text_rect)
+
+def show_info():
+    messagebox.showinfo("Hướng dẫn", "Truy cập vào file README.md để đọc hướng dẫn cách chơi online")
+
+def main_menu():
+    while True:
+        screen.fill(BLACK)
+        # Tính toán tọa độ để vẽ tiêu đề ở giữa màn hình
+        draw_text("Main Menu", font, WHITE, screen, WIDTH // 2, HEIGHT // 4)
+
+        # Tính toán tọa độ để vẽ nút Play ở giữa màn hình
+        play1_button_x = WIDTH // 2
+        play1_button_y = HEIGHT // 2 - 50
+        pygame.draw.rect(screen, WHITE, (play1_button_x - 150, play1_button_y - 25, 300, 50))
+        draw_text("PVP", font, BLACK, screen, play1_button_x, play1_button_y)
+
+        # Tính toán tọa độ để vẽ nút Play ở giữa màn hình
+        play2_button_x = WIDTH // 2
+        play2_button_y = HEIGHT // 2 + 50
+        pygame.draw.rect(screen, WHITE, (play2_button_x - 150, play2_button_y - 25, 300, 50))
+        draw_text("PVC", font, BLACK, screen, play2_button_x, play2_button_y)
+
+        # Tính toán tọa độ để vẽ nút Caro Online ở giữa màn hình
+        caro_button_x = WIDTH // 2
+        caro_button_y = HEIGHT // 2 + 150
+        pygame.draw.rect(screen, WHITE, (caro_button_x - 150, caro_button_y - 25, 300, 50))
+        draw_text("Chơi Online", font, BLACK, screen, caro_button_x, caro_button_y)
+
+        # Tính toán tọa độ để vẽ nút Quit ở giữa màn hình
+        quit_button_x = WIDTH // 2
+        quit_button_y = HEIGHT // 2 + 250
+        pygame.draw.rect(screen, WHITE, (quit_button_x - 150, quit_button_y - 25, 300, 50))
+        draw_text("QUIT", font, BLACK, screen, quit_button_x, quit_button_y)
+
+        # Cập nhật màn hình
+        pygame.display.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                menu_running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    mode = "PVP"
-                    menu_running = False
-                elif event.key == pygame.K_2:
-                    mode = "PVC"
-                    menu_running = False
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                if play1_button_x - 150 <= mouse_x <= play1_button_x + 150:
+                    if play1_button_y - 25 <= mouse_y <= play1_button_y + 25:
+                        # Xử lý khi nhấn Play PVP
+                        subprocess.Popen(["python", "player_player.py"])
+                    elif play2_button_y - 25 <= mouse_y <= play2_button_y + 25:
+                        # Xử lý khi nhấn Play PVC
+                        subprocess.Popen(["python", "player_computer.py"])
+                    elif caro_button_y - 25 <= mouse_y <= caro_button_y + 25:
+                        show_info()
+                    elif quit_button_y - 25 <= mouse_y <= quit_button_y + 25:
+                        # Xử lý khi nhấn Quit
+                        pygame.quit()
+                        sys.exit()
 
-    pygame.quit()
-
-    if mode:
-        if mode == "PVP":
-            import player_vs_player
-            player_vs_player.main()
-        elif mode == "PVC":
-            import pong_computer
-            pong_computer.main(mode)
 
 if __name__ == "__main__":
-    main()
+    main_menu()
